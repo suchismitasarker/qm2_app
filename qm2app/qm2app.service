@@ -1,0 +1,46 @@
+# /etc/systemd/system/qm2app.service
+# Systemd unit for the QM2 Data Analysis Flask/Gunicorn app
+#
+# Install:
+#   sudo cp qm2app.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable qm2app
+#   sudo systemctl start  qm2app
+
+[Unit]
+Description=QM2 Data Analysis App (Gunicorn)
+After=network.target nfs.service
+Wants=nfs.service
+
+[Service]
+# ── Identity ──────────────────────────────────────────────────────────────────
+User=qm2app
+Group=qm2app
+
+# ── Working directory & environment ───────────────────────────────────────────
+WorkingDirectory=/opt/qm2app
+Environment="PATH=/opt/qm2app/venv/bin"
+# Add any extra env vars here, e.g.:
+# Environment="FLASK_SECRET_KEY=change_me_to_a_random_string"
+
+# ── Start / stop ──────────────────────────────────────────────────────────────
+ExecStart=/opt/qm2app/venv/bin/gunicorn -c /opt/qm2app/gunicorn.conf.py app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+
+# ── Restart policy ────────────────────────────────────────────────────────────
+Restart=on-failure
+RestartSec=5s
+
+# ── Runtime directories (created automatically) ───────────────────────────────
+RuntimeDirectory=qm2app
+RuntimeDirectoryMode=0755
+
+# ── Logging (to journald; also forwarded to gunicorn log files) ───────────────
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=qm2app
+
+[Install]
+WantedBy=multi-user.target

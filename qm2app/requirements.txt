@@ -1,0 +1,11 @@
+flask>=2.3
+gunicorn>=21.2
+numpy
+scipy
+matplotlib
+h5py
+nexusformat
+nxs-analysis-tools
+fabio
+pyFAI
+pandas
